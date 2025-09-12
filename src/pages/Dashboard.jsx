@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../services/api'
 import Card from '../components/Card'
 
@@ -68,6 +69,20 @@ export default function Dashboard(){
               </li>
             ))}
           </ul>
+          <div style={{ marginTop: '20px', textAlign: 'right' }}>
+            <Link to="/inventory" style={{
+              display: 'inline-block',
+              padding: '8px 16px',
+              background: 'rgba(102, 178, 255, 0.1)',
+              color: 'var(--accent)',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              border: '1px solid var(--accent)',
+              fontWeight: '500'
+            }}>
+              Manage Inventory →
+            </Link>
+          </div>
         </Card>
       </div>
     </div>

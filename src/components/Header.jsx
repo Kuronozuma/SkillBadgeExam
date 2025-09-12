@@ -20,6 +20,7 @@ export default function Header(){
       {authed ? (
         <nav className="nav">
           <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
+          <Link to="/inventory" className={isActive('/inventory')}>Inventory</Link>
           <Link to="/customers" className={isActive('/customers')}>Customers</Link>
           <Link to="/distributors" className={isActive('/distributors')}>Distributors</Link>
           <Link to="/warehouse" className={isActive('/warehouse')}>Warehouse</Link>

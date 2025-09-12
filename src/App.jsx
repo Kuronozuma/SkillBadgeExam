@@ -7,6 +7,7 @@ import Customers from './pages/Customers'
 import Distributors from './pages/Distributors'
 import Warehouse from './pages/Warehouse'
 import Reports from './pages/Reports'
+import Inventory from './pages/Inventory'
 import { auth } from './services/auth'
 import Header from './components/Header'
 import Sidebar from './components/Sidebar'
@@ -91,6 +92,10 @@ export default function App() {
               <Route 
                 path="/reports" 
                 element={<PrivateRoute><Reports /></PrivateRoute>} 
+              />
+              <Route 
+                path="/inventory" 
+                element={<PrivateRoute><Inventory /></PrivateRoute>} 
               />
               <Route path="/" element={<Navigate to="/dashboard" />} />
               <Route path="*" element={<NotFound />} />

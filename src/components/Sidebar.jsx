@@ -18,6 +18,9 @@ export default function Sidebar(){
         <li className={isActive('/dashboard')}>
           <Link to="/dashboard">Dashboard</Link>
         </li>
+        <li className={isActive('/inventory')}>
+          <Link to="/inventory">Inventory</Link>
+        </li>
         <li className={isActive('/customers')}>
           <Link to="/customers">Customers</Link>
         </li>
