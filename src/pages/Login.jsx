@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { auth } from '../services/auth'
+import '../styles/pages/Login.css'
 
 export default function Login() {
   const [user, setUser] = useState('')

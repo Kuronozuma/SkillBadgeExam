@@ -1,4 +1,5 @@
 import React from 'react'
+import '../styles/components/Card.css'
 
 export default function Card({ title, children, className = '', onClick }) {
   const cardProps = {

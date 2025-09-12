@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { auth } from '../services/auth'
+import '../styles/components/Sidebar.css'
 
 export default function Sidebar(){
   const location = useLocation()

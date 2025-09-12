@@ -1,0 +1,51 @@
+/* Header styles */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 20px;
+  background: #001835; /* Match exact color from image */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  height: 64px;
+}
+
+.header .logo {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.header .nav {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.header .nav a {
+  color: var(--text);
+  text-decoration: none;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+.header .nav a:hover {
+  opacity: 1;
+  color: var(--accent);
+  background: rgba(102, 178, 255, 0.1);
+}
+
+.header .nav a.active {
+  color: var(--accent);
+  opacity: 1;
+  font-weight: 500;
+  background: rgba(102, 178, 255, 0.15);
+}
+
+.header-right {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: var(--text-secondary);
+}

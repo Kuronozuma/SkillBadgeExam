@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { auth } from '../services/auth'
+import '../styles/components/Header.css'
 
 export default function Header(){
   const navigate = useNavigate()

@@ -1,0 +1,59 @@
+/* Card styles with gradient */
+.card {
+  background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end));
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  max-width: 100%;
+}
+
+/* Special styling for dashboard cards */
+.grid .card {
+  background: linear-gradient(135deg, #370B4A, #132f4c);
+  border: none;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+}
+
+/* Clickable card styles */
+.card[onclick] {
+  cursor: pointer;
+}
+
+.card.active-card {
+  border-color: var(--accent);
+  box-shadow: 0 8px 28px rgba(102, 178, 255, 0.15);
+}
+
+/* Card header/body styles */
+.card-header {
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 14px;
+}
+
+.card-title {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 18px;
+}
+
+.card-body {
+  color: var(--text);
+}
+
+/* Lists in cards */
+.card ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-secondary);
+}
+
+.card li {
+  margin-bottom: 8px;
+}
