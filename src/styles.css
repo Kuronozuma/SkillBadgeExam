@@ -1,8 +1,8 @@
 :root{
-  --bg: #0a1929;
+  --bg: #001835; /* Darker blue background from the image */
   --card: #132f4c;
-  --card-gradient-start: #1a3d60;
-  --card-gradient-end: #132f4c;
+  --card-gradient-start: #370B4A; /* Deep purple from left side of login card */
+  --card-gradient-end: #9C9C9C; /* Light gray from right side of login card */
   --accent: #66b2ff;
   --text: #ffffff;
   --text-secondary: #b2bac2;
@@ -30,6 +30,7 @@ body {
   background: var(--bg);
   color: var(--text);
   background-attachment: fixed;
+  min-height: 100vh;
 }
 
 .app {
@@ -44,7 +45,7 @@ body {
   align-items: center;
   gap: 20px;
   padding: 12px 20px;
-  background: linear-gradient(90deg, #0c223a, #0a1929);
+  background: #001835; /* Match exact color from image */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   height: 64px;
 }
@@ -155,6 +156,12 @@ body {
   border: 1px solid var(--border);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   max-width: 100%;
+}
+
+/* Special styling for dashboard cards */
+.grid .card {
+  background: linear-gradient(135deg, #370B4A, #132f4c);
+  border: none;
 }
 
 .card:hover {
@@ -291,15 +298,19 @@ input:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  min-height: calc(100vh - 64px);
-  background: linear-gradient(180deg, #0a1929 0%, #0c223a 100%);
+  padding: 0;
+  min-height: 100vh;
+  background: var(--bg); /* Use the exact dark blue from the image */
 }
 
 .login-card-container {
-  max-width: 420px;
+  max-width: 500px; /* Slightly larger to match image */
   margin: 0 auto;
   width: 100%;
+  background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end)); /* Purple to gray gradient */
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
 }
 
 /* Loading spinner */
