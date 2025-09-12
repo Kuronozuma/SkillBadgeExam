@@ -1,29 +1,41 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { auth } from '../services/auth'
 
-export default function Login() {
+export default function Signup(){
   const [user, setUser] = useState('')
   const [pass, setPass] = useState('')
+  const [confirmPass, setConfirmPass] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
 
-  useEffect(()=>{
-    if(auth.isAuthenticated()) navigate('/dashboard')
-  },[navigate])
-
   const onSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if(!user || !pass){ setError('Please enter both username and password'); return }
+    
+    // Validation
+    if(!user || !pass){ 
+      setError('Please enter both username and password'); 
+      return;
+    }
+    
+    if(pass !== confirmPass) {
+      setError('Passwords do not match');
+      return;
+    }
+    
+    if(pass.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
     
     setIsLoading(true)
     try {
-      await auth.login(user, pass)
+      await auth.signup(user, pass)
       navigate('/dashboard')
     } catch(err) { 
-      setError(err.message || 'Login failed. Please check your credentials.') 
+      setError(err.message || 'Signup failed. Please try again.') 
       setIsLoading(false)
     }
   }
@@ -32,7 +44,7 @@ export default function Login() {
     <div className="unauthenticated-wrapper">
       <div className="login-card-container">
         <div className="card">
-          <h2 style={{textAlign: 'center', marginTop: 0}}>Welcome to Inventory App</h2>
+          <h2 style={{textAlign: 'center', marginTop: 0}}>Create Account</h2>
           <form onSubmit={onSubmit}>
             <div style={{marginBottom: '16px'}}>
               <label style={{display: 'block', marginBottom: '8px', color: 'var(--text-secondary)'}}>
@@ -40,8 +52,8 @@ export default function Login() {
               </label>
               <input 
                 value={user} 
-                onChange={e => setUser(e.target.value)}
-                placeholder="Enter your username"
+                onChange={e => setUser(e.target.value)} 
+                placeholder="Choose a username"
                 disabled={isLoading}
               />
             </div>
@@ -53,8 +65,21 @@ export default function Login() {
               <input 
                 type="password" 
                 value={pass} 
-                onChange={e => setPass(e.target.value)}
-                placeholder="Enter your password"
+                onChange={e => setPass(e.target.value)} 
+                placeholder="Create a password"
+                disabled={isLoading}
+              />
+            </div>
+            
+            <div style={{marginBottom: '16px'}}>
+              <label style={{display: 'block', marginBottom: '8px', color: 'var(--text-secondary)'}}>
+                Confirm Password
+              </label>
+              <input 
+                type="password" 
+                value={confirmPass} 
+                onChange={e => setConfirmPass(e.target.value)} 
+                placeholder="Confirm your password"
                 disabled={isLoading}
               />
             </div>
@@ -83,11 +108,11 @@ export default function Login() {
                 style={{flex: 1}}
                 disabled={isLoading}
               >
-                {isLoading ? 'Logging in...' : 'Login'}
+                {isLoading ? 'Creating account...' : 'Create account'}
               </button>
               
               <Link 
-                to="/signup" 
+                to="/login" 
                 style={{
                   flex: 1,
                   display: 'inline-flex',
@@ -103,7 +128,7 @@ export default function Login() {
                   textAlign: 'center'
                 }}
               >
-                Sign up
+                Back to login
               </Link>
             </div>
           </form>
