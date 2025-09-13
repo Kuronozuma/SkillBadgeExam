@@ -5,6 +5,7 @@ import Card from '../components/Card';
 export default function Inventory() {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
@@ -23,11 +24,17 @@ export default function Inventory() {
 
   const fetchInventory = async () => {
     setIsLoading(true);
+    setError(null);
     try {
+
       const data = await api.fetchInventory();
-      setItems(data);
+      setItems(Array.isArray(data) ? data : (data?.items || []));
+      setIsLoading(false);
+      console.log('Inventory data received:', data);
     } catch (error) {
       console.error('Failed to load inventory:', error);
+      setError(error.message || 'Failed to load inventory data');
+      setItems([]); // Set empty array on error
     } finally {
       setIsLoading(false);
     }
@@ -115,6 +122,34 @@ export default function Inventory() {
     <div>
       <h2>Inventory Management</h2>
 
+      {/* Error Display */}
+      {error && (
+        <Card>
+          <div style={{ 
+            color: 'var(--error)', 
+            padding: '16px', 
+            textAlign: 'center',
+            background: 'rgba(255, 107, 107, 0.1)',
+            borderRadius: '8px',
+            marginBottom: '20px'
+          }}>
+            <strong>Error:</strong> {error}
+            <div style={{ marginTop: '8px' }}>
+              <button onClick={fetchInventory} style={{ 
+                padding: '8px 16px', 
+                background: 'var(--accent)', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}>
+                Retry
+              </button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Search and Add Controls */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div style={{ width: '60%' }}>
@@ -191,14 +226,14 @@ export default function Inventory() {
                         <td style={{ fontWeight: '500' }}>{item.name}</td>
                         <td>{item.category}</td>
                         <td style={{
-                          color: item.stock < 20 ? 'var(--error)' : 'inherit',
-                          fontWeight: item.stock < 20 ? '600' : 'inherit'
+                          color: item.stock < (item.minStockLevel || 20) ? 'var(--error)' : 'inherit',
+                          fontWeight: item.stock < (item.minStockLevel || 20) ? '600' : 'inherit'
                         }}>
                           {item.stock}
                         </td>
                         <td>₱{item.price?.toFixed(2) || '0.00'}</td>
-                        <td>{item.ordered}</td>
-                        <td>{item.supplier || 'N/A'}</td>
+                        <td>{item.ordered || 0}</td>
+                        <td>{item.distributor?.name || 'N/A'}</td>
                         <td>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <button

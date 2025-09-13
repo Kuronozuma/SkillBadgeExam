@@ -19,7 +19,11 @@ export default function Customers(){
       })
   }, [])
   
-  const filtered = rows.filter(r => r.name.toLowerCase().includes(q.toLowerCase()))
+  const filtered = rows.filter(r => 
+    r.name.toLowerCase().includes(q.toLowerCase()) ||
+    (r.email && r.email.toLowerCase().includes(q.toLowerCase())) ||
+    (r.contactPerson && r.contactPerson.toLowerCase().includes(q.toLowerCase()))
+  )
   
   return (
     <div>
@@ -72,20 +76,22 @@ export default function Customers(){
             <div style={{overflowX: 'auto'}}>
               <table className="table">
                 <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Orders</th>
-                    <th>Last order</th>
-                    <th>Actions</th>
-                  </tr>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Orders</th>
+                      <th>Last order</th>
+                      <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
                   {filtered.map(r => (
                     <tr key={r.id}>
                       <td>{r.id}</td>
                       <td>{r.name}</td>
-                      <td>{r.orders}</td>
+                      <td>{r.email || '-'}</td>
+                      <td>{r.orders || 0}</td>
                       <td>{r.lastOrder || '-'}</td>
                       <td>
                         <div style={{display: 'flex', gap: '8px'}}>

@@ -54,6 +54,16 @@ export default function Distributors(){
                     <strong>Contact:</strong> {distributor.contactPerson || 'N/A'}
                   </div>
                 )}
+                {distributor.contactEmail && (
+                  <div style={{color: 'var(--text-secondary)'}}>
+                    <strong>Email:</strong> {distributor.contactEmail}
+                  </div>
+                )}
+                {distributor.itemCount !== undefined && (
+                  <div style={{color: 'var(--accent)', fontWeight: '500'}}>
+                    <strong>Items:</strong> {distributor.itemCount}
+                  </div>
+                )}
                 
                 <div style={{
                   marginTop: '12px',

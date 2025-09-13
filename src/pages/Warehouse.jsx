@@ -10,7 +10,8 @@ export default function Warehouse(){
   useEffect(() => {
     api.fetchWarehouse()
       .then(data => {
-        setRows(data)
+        const rows = Array.isArray(data) ? data : (data?.logs || []);
+        setRows(rows)
         setIsLoading(false)
       })
       .catch(err => {
@@ -22,22 +23,27 @@ export default function Warehouse(){
   // Filter items based on status
   const filteredRows = filter === 'all' 
     ? rows 
-    : rows.filter(r => r.status.toLowerCase() === filter)
+    : rows.filter(r => r.status?.toLowerCase() === filter)
   
   // Get counts for each status
   const counts = {
     all: rows.length,
-    pending: rows.filter(r => r.status.toLowerCase() === 'pending').length,
-    shipped: rows.filter(r => r.status.toLowerCase() === 'shipped').length,
-    delivered: rows.filter(r => r.status.toLowerCase() === 'delivered').length
+    pending: rows.filter(r => r.status?.toLowerCase() === 'pending').length,
+    shipped: rows.filter(r => r.status?.toLowerCase() === 'shipped').length,
+    delivered: rows.filter(r => r.status?.toLowerCase() === 'delivered').length
   }
   
   // Status color mapping
   const statusColor = (status) => {
+    if (!status) return 'var(--text-secondary)';
     switch(status.toLowerCase()) {
       case 'pending': return '#ff9800';
       case 'shipped': return '#66b2ff';
       case 'delivered': return '#4caf50';
+      case 'received': return '#4caf50';
+      case 'missing': return '#f44336';
+      case 'damaged': return '#ff5722';
+      case 'spoiled': return '#9c27b0';
       default: return 'var(--text-secondary)';
     }
   }
@@ -99,7 +105,10 @@ export default function Warehouse(){
                   <thead>
                     <tr>
                       <th>ID</th>
+                      <th>Type</th>
                       <th>Status</th>
+                      <th>Quantity</th>
+                      <th>Item</th>
                       <th>Note</th>
                       <th>Actions</th>
                     </tr>
@@ -115,6 +124,20 @@ export default function Warehouse(){
                             borderRadius: '4px',
                             fontSize: '12px',
                             fontWeight: '600',
+                            background: 'rgba(102, 178, 255, 0.1)',
+                            color: 'var(--accent)',
+                            textTransform: 'capitalize'
+                          }}>
+                            {r.type}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            fontWeight: '600',
                             background: `${statusColor(r.status)}20`,
                             color: statusColor(r.status),
                             textTransform: 'capitalize'
@@ -122,7 +145,9 @@ export default function Warehouse(){
                             {r.status}
                           </span>
                         </td>
-                        <td>{r.note}</td>
+                        <td>{r.quantity || 0}</td>
+                        <td>{r.item?.name || '-'}</td>
+                        <td>{r.note || '-'}</td>
                         <td>
                           <div style={{display: 'flex', gap: '8px'}}>
                             <button 
@@ -150,8 +175,8 @@ export default function Warehouse(){
                       </tr>
                     )) : (
                       <tr>
-                        <td colSpan="4" style={{textAlign: 'center', padding: '20px', color: 'var(--text-secondary)'}}>
-                          No shipments found with {filter} status.
+                        <td colSpan="7" style={{textAlign: 'center', padding: '20px', color: 'var(--text-secondary)'}}>
+                          No warehouse logs found with {filter} status.
                         </td>
                       </tr>
                     )}

@@ -1,38 +1,143 @@
-const tokenKey = 'inv_token'
-const userKey = 'inv_user'
+const API_BASE_URL = 'http://localhost:3001/api';
+const tokenKey = 'inv_token';
+const userKey = 'inv_user';
+
+// Helper function to make API requests
+const apiRequest = async (endpoint, options = {}) => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers
+    },
+    ...options
+  };
+
+  try {
+    const response = await fetch(url, config);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('API request failed:', error);
+    throw error;
+  }
+};
 
 export const auth = {
   login: async (username, password) => {
-    // mock login: accept any non-empty
-    if (username && password) {
-      const token = btoa(username + ':' + password)
-      localStorage.setItem(tokenKey, token)
-      localStorage.setItem(userKey, JSON.stringify({ username }))
-      return { token }
+    try {
+      const response = await apiRequest('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ username, password })
+      });
+
+      const { user, token } = response.data;
+      
+      localStorage.setItem(tokenKey, token);
+      localStorage.setItem(userKey, JSON.stringify(user));
+      
+      return { token, user };
+    } catch (error) {
+      throw new Error(error.message || 'Login failed');
     }
-    throw new Error('Invalid')
   },
+
   signup: async (username, password) => {
-    // very small mock signup: just store the user
-    if (username && password) {
-      // in a real app you'd call the backend
-      localStorage.setItem(userKey, JSON.stringify({ username }))
-      const token = btoa(username + ':' + password)
-      localStorage.setItem(tokenKey, token)
-      return { token }
+    try {
+      const response = await apiRequest('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ username, password })
+      });
+
+      const { user, token } = response.data;
+      
+      localStorage.setItem(tokenKey, token);
+      localStorage.setItem(userKey, JSON.stringify(user));
+      
+      return { token, user };
+    } catch (error) {
+      throw new Error(error.message || 'Registration failed');
     }
-    throw new Error('Invalid')
   },
-  logout: () => {
-    localStorage.removeItem(tokenKey)
-    localStorage.removeItem(userKey)
+
+  logout: async () => {
+    try {
+      // Call logout endpoint if token exists
+      const token = localStorage.getItem(tokenKey);
+      if (token) {
+        await apiRequest('/auth/logout', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Logout API call failed:', error);
+    } finally {
+      // Always clear local storage
+      localStorage.removeItem(tokenKey);
+      localStorage.removeItem(userKey);
+    }
   },
-  isAuthenticated: () => !!localStorage.getItem(tokenKey),
+
+  isAuthenticated: () => {
+    const token = localStorage.getItem(tokenKey);
+    if (!token) return false;
+    
+    try {
+      // Check if token is expired (basic check)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Date.now() / 1000;
+      return payload.exp > now;
+    } catch {
+      return false;
+    }
+  },
+
   getToken: () => localStorage.getItem(tokenKey),
+
   getUser: () => {
     try {
-      const s = localStorage.getItem(userKey)
-      return s ? JSON.parse(s) : null
-    } catch { return null }
+      const userStr = localStorage.getItem(userKey);
+      return userStr ? JSON.parse(userStr) : null;
+    } catch {
+      return null;
+    }
+  },
+
+  updateProfile: async (profileData) => {
+    try {
+      const response = await apiRequest('/auth/profile', {
+        method: 'PUT',
+        body: JSON.stringify(profileData)
+      });
+
+      const { user } = response.data;
+      localStorage.setItem(userKey, JSON.stringify(user));
+      
+      return user;
+    } catch (error) {
+      throw new Error(error.message || 'Profile update failed');
+    }
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    try {
+      await apiRequest('/auth/change-password', {
+        method: 'PUT',
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      
+      return true;
+    } catch (error) {
+      throw new Error(error.message || 'Password change failed');
+    }
   }
-}
+};

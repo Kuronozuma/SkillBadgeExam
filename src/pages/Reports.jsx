@@ -118,11 +118,11 @@ export default function Reports(){
               </tr>
             </thead>
             <tbody>
-              {data.inventory.map(item => (
+              {data.inventory?.map(item => (
                 <tr key={item.id}>
                   <td>{item.id}</td>
                   <td style={{fontWeight: '500'}}>{item.name}</td>
-                  <td>{item.ordered}</td>
+                  <td>{item.ordered || 0}</td>
                   <td>
                     <span style={{
                       display: 'inline-block',
@@ -130,14 +130,14 @@ export default function Reports(){
                       borderRadius: '4px',
                       fontSize: '12px',
                       fontWeight: '600',
-                      background: item.ordered > 50 ? 'rgba(76, 175, 80, 0.15)' : 'rgba(255, 152, 0, 0.15)',
-                      color: item.ordered > 50 ? '#4caf50' : '#ff9800',
+                      background: (item.ordered || 0) > 50 ? 'rgba(76, 175, 80, 0.15)' : 'rgba(255, 152, 0, 0.15)',
+                      color: (item.ordered || 0) > 50 ? '#4caf50' : '#ff9800',
                     }}>
-                      {item.ordered > 50 ? 'High Demand' : 'Normal'}
+                      {(item.ordered || 0) > 50 ? 'High Demand' : 'Normal'}
                     </span>
                   </td>
                 </tr>
-              ))}
+              )) || []}
             </tbody>
           </table>
         </Card>
@@ -161,11 +161,11 @@ export default function Reports(){
               </tr>
             </thead>
             <tbody>
-              {data.clients.map(client => (
+              {data.clients?.map(client => (
                 <tr key={client.id}>
                   <td>{client.id}</td>
                   <td style={{fontWeight: '500'}}>{client.name}</td>
-                  <td>{client.orders}</td>
+                  <td>{client.orders || 0}</td>
                   <td>
                     <span style={{
                       display: 'inline-block',
@@ -173,14 +173,14 @@ export default function Reports(){
                       borderRadius: '4px',
                       fontSize: '12px',
                       fontWeight: '600',
-                      background: client.orders > 30 ? 'rgba(76, 175, 80, 0.15)' : 'rgba(102, 178, 255, 0.15)',
-                      color: client.orders > 30 ? '#4caf50' : 'var(--accent)',
+                      background: (client.orders || 0) > 30 ? 'rgba(76, 175, 80, 0.15)' : 'rgba(102, 178, 255, 0.15)',
+                      color: (client.orders || 0) > 30 ? '#4caf50' : 'var(--accent)',
                     }}>
-                      {client.orders > 30 ? 'Key Account' : 'Regular'}
+                      {(client.orders || 0) > 30 ? 'Key Account' : 'Regular'}
                     </span>
                   </td>
                 </tr>
-              ))}
+              )) || []}
             </tbody>
           </table>
         </Card>

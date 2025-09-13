@@ -1,105 +1,265 @@
-// Use localStorage to persist data
-const getLocalStorage = (key, defaultValue) => {
-  const stored = localStorage.getItem(key);
-  return stored ? JSON.parse(stored) : defaultValue;
+// API Configuration
+const API_BASE_URL = 'http://localhost:3001/api';
+
+// Helper function to get auth token
+const getAuthToken = () => {
+  return localStorage.getItem('inv_token');
 };
 
-const setLocalStorage = (key, value) => {
-  localStorage.setItem(key, JSON.stringify(value));
+// Helper function to make API requests
+const apiRequest = async (endpoint, options = {}) => {
+  const token = getAuthToken();
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers
+    },
+    ...options
+  };
+
+  try {
+    const response = await fetch(url, config);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('API request failed:', error);
+    throw error;
+  }
 };
-
-// Default sample data
-const defaultData = {
-  customers: [
-    { id: 1, name: 'Alpha Store', orders: 23, lastOrder: '2025-09-10' },
-    { id: 2, name: 'Beta Mart', orders: 5, lastOrder: '2025-08-22' },
-    { id: 3, name: 'Gamma Shop', orders: 12, lastOrder: '2025-09-01' }
-  ],
-  items: [
-    { id: 'sku-1', name: 'Rice 50kg', category: 'Food', ordered: 120, stock: 85, price: 39.99, supplier: 'Distributor A' },
-    { id: 'sku-2', name: 'Sugar 25kg', category: 'Food', ordered: 40, stock: 30, price: 24.99, supplier: 'Distributor A' },
-    { id: 'sku-3', name: 'Soap', category: 'Hygiene', ordered: 10, stock: 100, price: 2.50, supplier: 'Distributor B' },
-    { id: 'sku-4', name: 'Cooking Oil 5L', category: 'Food', ordered: 90, stock: 42, price: 15.75, supplier: 'Distributor A' }
-  ],
-  distributors: [
-    { id: 1, name: 'Distributor A', contact: 'alice@dist.com', location: 'East Warehouse' },
-    { id: 2, name: 'Distributor B', contact: 'bob@dist.com', location: 'North Warehouse' }
-  ],
-  warehouse: [
-    { id: 1, status: 'received', note: 'OK' },
-    { id: 2, status: 'missing', note: 'Expected 10, got 7' }
-  ]
-};
-
-// Initialize sample data in localStorage if not present
-if (!localStorage.getItem('inventory_app_data')) {
-  setLocalStorage('inventory_app_data', defaultData);
-}
-
-// Get current data from localStorage
-const getSample = () => getLocalStorage('inventory_app_data', defaultData);
 
 export const api = {
   // Dashboard data
   fetchDashboard: async () => {
-    const sample = getSample();
-    // compute most/least ordered
-    const most = sample.items.reduce((a, b) => (b.ordered > a.ordered ? b : a));
-    const least = sample.items.reduce((a, b) => (b.ordered < a.ordered ? b : a));
-    const topCustomer = sample.customers.reduce((a, b) => (b.orders > a.orders ? b : a));
-    const categories = [...new Set(sample.items.map(i => i.category))];
-    const topItems = [...sample.items].sort((a, b) => b.ordered - a.ordered).slice(0, 5);
-    return { most, least, topCustomer, categories, topItems };
+    const response = await apiRequest('/dashboard');
+    return response.data;
   },
 
   // Basic CRUD operations
-  fetchCustomers: async () => getSample().customers,
-  fetchDistributors: async () => getSample().distributors,
-  fetchWarehouse: async () => getSample().warehouse,
-  fetchReports: async () => {
-    const sample = getSample();
-    return { inventory: sample.items, clients: sample.customers };
+  fetchCustomers: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const response = await apiRequest(`/customers${queryString ? `?${queryString}` : ''}`);
+    return response.data.customers;
+  },
+
+  fetchDistributors: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const response = await apiRequest(`/distributors${queryString ? `?${queryString}` : ''}`);
+    return response.data.distributors;
+  },
+
+  fetchWarehouse: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const response = await apiRequest(`/warehouse${queryString ? `?${queryString}` : ''}`);
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (response.data && Array.isArray(response.data.logs)) return response.data.logs;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.logs)) return response.logs;
+    return [];
+  },
+  
+  fetchReports: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const response = await apiRequest(`/reports/inventory${queryString ? `?${queryString}` : ''}`);
+    return response.data;
+  },
+
+  // Test API connection
+  testInventory: async () => {
+    try {
+      const response = await apiRequest('/inventory/test');
+      console.log('Inventory test response:', response);
+      return response;
+    } catch (error) {
+      console.error('Inventory test error:', error);
+      throw error;
+    }
   },
 
   // Inventory specific operations
-  fetchInventory: async () => getSample().items,
-
+  fetchInventory: async (params = {}) => {
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const response = await apiRequest(`/inventory${queryString ? `?${queryString}` : ''}`);
+      if (!response) return [];
+      if (Array.isArray(response)) return response;
+      if (response.data && Array.isArray(response.data.items)) return response.data.items;
+      if (Array.isArray(response.data)) return response.data;
+      if (Array.isArray(response.items)) return response.items;
+      // Fallback: try to find items nested arbitrarily
+      return (response.data && response.data.items) || response.items || [];
+    } catch (error) {
+      console.error('Inventory API error:', error);
+      throw error;
+    }
+  },
   getInventoryItem: async (id) => {
-    const sample = getSample();
-    const item = sample.items.find(i => i.id === id);
-    return item ? { ...item } : null;
+    const response = await apiRequest(`/inventory/${id}`);
+    return response.data.item;
   },
 
   createInventoryItem: async (item) => {
-    const sample = getSample();
-    const newId = `sku-${Date.now()}`;
-    const newItem = { ...item, id: newId, ordered: 0 };
-    sample.items.push(newItem);
-    setLocalStorage('inventory_app_data', sample);
-    return newItem;
+    const response = await apiRequest('/inventory', {
+      method: 'POST',
+      body: JSON.stringify(item)
+    });
+    return response.data.item;
   },
 
   updateInventoryItem: async (id, updatedData) => {
-    const sample = getSample();
-    const index = sample.items.findIndex(i => i.id === id);
-
-    if (index !== -1) {
-      sample.items[index] = { ...sample.items[index], ...updatedData };
-      setLocalStorage('inventory_app_data', sample);
-      return sample.items[index];
-    }
-    throw new Error('Item not found');
+    const response = await apiRequest(`/inventory/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updatedData)
+    });
+    return response.data.item;
   },
 
   deleteInventoryItem: async (id) => {
-    const sample = getSample();
-    const index = sample.items.findIndex(i => i.id === id);
+    await apiRequest(`/inventory/${id}`, {
+      method: 'DELETE'
+    });
+    return true;
+  },
 
-    if (index !== -1) {
-      sample.items.splice(index, 1);
-      setLocalStorage('inventory_app_data', sample);
-      return true;
-    }
-    throw new Error('Item not found');
+  // Customer operations
+  createCustomer: async (customer) => {
+    const response = await apiRequest('/customers', {
+      method: 'POST',
+      body: JSON.stringify(customer)
+    });
+    return response.data.customer;
+  },
+
+  updateCustomer: async (id, updatedData) => {
+    const response = await apiRequest(`/customers/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updatedData)
+    });
+    return response.data.customer;
+  },
+
+  deleteCustomer: async (id) => {
+    await apiRequest(`/customers/${id}`, {
+      method: 'DELETE'
+    });
+    return true;
+  },
+
+  // Distributor operations
+  createDistributor: async (distributor) => {
+    const response = await apiRequest('/distributors', {
+      method: 'POST',
+      body: JSON.stringify(distributor)
+    });
+    return response.data.distributor;
+  },
+
+  updateDistributor: async (id, updatedData) => {
+    const response = await apiRequest(`/distributors/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updatedData)
+    });
+    return response.data.distributor;
+  },
+
+  deleteDistributor: async (id) => {
+    await apiRequest(`/distributors/${id}`, {
+      method: 'DELETE'
+    });
+    return true;
+  },
+
+  // Order operations
+  fetchOrders: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const response = await apiRequest(`/orders${queryString ? `?${queryString}` : ''}`);
+    return response.data.orders;
+  },
+
+  createOrder: async (order) => {
+    const response = await apiRequest('/orders', {
+      method: 'POST',
+      body: JSON.stringify(order)
+    });
+    return response.data.order;
+  },
+
+  updateOrder: async (id, updatedData) => {
+    const response = await apiRequest(`/orders/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updatedData)
+    });
+    return response.data.order;
+  },
+
+  updateOrderStatus: async (id, status) => {
+    const response = await apiRequest(`/orders/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    });
+    return response.data.order;
+  },
+
+  deleteOrder: async (id) => {
+    await apiRequest(`/orders/${id}`, {
+      method: 'DELETE'
+    });
+    return true;
+  },
+
+  // Warehouse operations
+  createWarehouseLog: async (log) => {
+    const response = await apiRequest('/warehouse', {
+      method: 'POST',
+      body: JSON.stringify(log)
+    });
+    return response.data.log;
+  },
+
+  updateWarehouseLog: async (id, updatedData) => {
+    const response = await apiRequest(`/warehouse/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updatedData)
+    });
+    return response.data.log;
+  },
+
+  deleteWarehouseLog: async (id) => {
+    await apiRequest(`/warehouse/${id}`, {
+      method: 'DELETE'
+    });
+    return true;
+  },
+
+  // Reports
+  fetchInventoryReport: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const response = await apiRequest(`/reports/inventory${queryString ? `?${queryString}` : ''}`);
+    return response.data;
+  },
+
+  fetchCustomerReport: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const response = await apiRequest(`/reports/customers${queryString ? `?${queryString}` : ''}`);
+    return response.data;
+  },
+
+  fetchMonthlyReport: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const response = await apiRequest(`/reports/monthly${queryString ? `?${queryString}` : ''}`);
+    return response.data;
+  },
+
+  fetchStockAlerts: async () => {
+    const response = await apiRequest('/reports/stock-alerts');
+    return response.data;
   }
-}
+};
