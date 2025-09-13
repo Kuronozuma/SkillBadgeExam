@@ -1,6 +1,7 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
+import Landing_Page from './pages/Landing_Page'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import Customers from './pages/Customers'
@@ -42,7 +43,7 @@ function NotFound() {
         marginBottom: '20px',
         maxWidth: '500px'
       }}>
-        <p style={{color: 'var(--text-secondary)', marginBottom: '16px'}}>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
           The page you're looking for doesn't exist or has been moved.
         </p>
         <button onClick={() => window.location.href = '/dashboard'}>
@@ -56,11 +57,11 @@ function NotFound() {
 export default function App() {
   // Check if we're on an authentication page
   const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/signup';
-  
+
   return (
     <div className="app">
       {!isAuthPage && <Header />}
-      
+
       {isAuthPage ? (
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -73,29 +74,29 @@ export default function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route 
-                path="/dashboard" 
-                element={<PrivateRoute><Dashboard /></PrivateRoute>} 
+              <Route
+                path="/dashboard"
+                element={<PrivateRoute><Dashboard /></PrivateRoute>}
               />
-              <Route 
-                path="/customers" 
-                element={<PrivateRoute><Customers /></PrivateRoute>} 
+              <Route
+                path="/customers"
+                element={<PrivateRoute><Customers /></PrivateRoute>}
               />
-              <Route 
-                path="/distributors" 
-                element={<PrivateRoute><Distributors /></PrivateRoute>} 
+              <Route
+                path="/distributors"
+                element={<PrivateRoute><Distributors /></PrivateRoute>}
               />
-              <Route 
-                path="/warehouse" 
-                element={<PrivateRoute><Warehouse /></PrivateRoute>} 
+              <Route
+                path="/warehouse"
+                element={<PrivateRoute><Warehouse /></PrivateRoute>}
               />
-              <Route 
-                path="/reports" 
-                element={<PrivateRoute><Reports /></PrivateRoute>} 
+              <Route
+                path="/reports"
+                element={<PrivateRoute><Reports /></PrivateRoute>}
               />
-              <Route 
-                path="/inventory" 
-                element={<PrivateRoute><Inventory /></PrivateRoute>} 
+              <Route
+                path="/inventory"
+                element={<PrivateRoute><Inventory /></PrivateRoute>}
               />
               <Route path="/" element={<Navigate to="/dashboard" />} />
               <Route path="*" element={<NotFound />} />
