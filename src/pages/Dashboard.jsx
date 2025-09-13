@@ -4,10 +4,10 @@ import { api } from '../services/api'
 import Card from '../components/Card'
 import '../styles/pages/Dashboard.css'
 
-export default function Dashboard(){
+export default function Dashboard() {
   const [data, setData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
-  
+
   useEffect(() => {
     api.fetchDashboard()
       .then(data => {
@@ -19,8 +19,8 @@ export default function Dashboard(){
         setIsLoading(false)
       })
   }, [])
-  
-  if(isLoading) {
+
+  if (isLoading) {
     return (
       <div className="loading-container">
         <Card>
@@ -29,44 +29,44 @@ export default function Dashboard(){
       </div>
     )
   }
-  
-  if(!data) {
+
+  if (!data) {
     return <Card>Failed to load dashboard data. Please try again.</Card>
   }
-  
+
   return (
     <div>
       <h2>Dashboard Overview</h2>
       <div className="grid">
         <Card title="Most Ordered Item">
-          <div style={{fontSize:20, fontWeight:600, marginBottom:8}}>{data.most.name}</div>
-          <div style={{color:'var(--accent)', fontWeight:500}}>{data.most.ordered} orders</div>
+          <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>{data.most.name}</div>
+          <div style={{ color: 'var(--accent)', fontWeight: 500 }}>{data.most.ordered} orders</div>
         </Card>
 
         <Card title="Least Ordered Item">
-          <div style={{fontSize:20, fontWeight:600, marginBottom:8}}>{data.least.name}</div>
-          <div style={{color:'var(--accent)', fontWeight:500}}>{data.least.ordered} orders</div>
+          <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>{data.least.name}</div>
+          <div style={{ color: 'var(--accent)', fontWeight: 500 }}>{data.least.ordered} orders</div>
         </Card>
 
         <Card title="Top Customer">
-          <div style={{fontSize:20, fontWeight:600, marginBottom:8}}>{data.topCustomer.name}</div>
-          <div style={{color:'var(--accent)', fontWeight:500}}>{data.topCustomer.orders} orders</div>
+          <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>{data.topCustomer.name}</div>
+          <div style={{ color: 'var(--accent)', fontWeight: 500 }}>{data.topCustomer.orders} orders</div>
         </Card>
 
         <Card title="Product Categories">
-          <div style={{color:'var(--text-secondary)', fontSize:16}}>
+          <div style={{ color: 'var(--text-secondary)', fontSize: 16 }}>
             {data.categories.join(', ')}
           </div>
         </Card>
       </div>
 
-      <div style={{marginTop:24}}>
+      <div style={{ marginTop: 24 }}>
         <Card title="Top Performing Items">
           <ul>
             {data.topItems?.map(item => (
               <li key={item.id}>
-                <span style={{color:'var(--text)', fontWeight:500}}>{item.name}</span>
-                <span style={{color:'var(--accent)', marginLeft:8}}>— {item.ordered} orders</span>
+                <span style={{ color: 'var(--text)', fontWeight: 500 }}>{item.name}</span>
+                <span style={{ color: 'var(--accent)', marginLeft: 8 }}>— {item.ordered} orders</span>
               </li>
             ))}
           </ul>

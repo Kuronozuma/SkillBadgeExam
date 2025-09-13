@@ -64,6 +64,7 @@ export default function App() {
 
       {isAuthPage ? (
         <Routes>
+          <Route path="/" element={<Landing_Page />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Routes>
@@ -72,8 +73,14 @@ export default function App() {
           <Sidebar />
           <main className="main">
             <Routes>
+              {/* Public Landing Page */}
+              <Route path="/" element={<Landing_Page />} />
+
+              {/* Auth Pages */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+
+              {/* Protected Routes */}
               <Route
                 path="/dashboard"
                 element={<PrivateRoute><Dashboard /></PrivateRoute>}
@@ -98,7 +105,8 @@ export default function App() {
                 path="/inventory"
                 element={<PrivateRoute><Inventory /></PrivateRoute>}
               />
-              <Route path="/" element={<Navigate to="/dashboard" />} />
+
+              {/* 404 fallback */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

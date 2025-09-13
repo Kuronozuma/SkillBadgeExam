@@ -1,7 +1,10 @@
 import React from "react";
-import '../css_pages/landing_page.css';
+import { useNavigate } from "react-router-dom";
+import '../styles/pages/landing page.css';
+
 
 export default function LandingPage() {
+  const navigate = useNavigate();
   return (
     <div className="landing-container">
       <header className="header">
@@ -16,10 +19,10 @@ export default function LandingPage() {
       </header>
 
       <section className="hero">
-        <h2>Manage Your Inventory with Ease</h2>
+        <h2>Stock Smarter. Sell Faster. Vape Better.</h2>
         <p>
-          Track your products, monitor top performing items, and manage
-          customers & distributors seamlessly — all in one powerful dashboard.
+          Monitor top-selling juices, manage stock effortlessly, and connect better
+          with customers & distributors — everything you need in one place.
         </p>
         <div>
           <button className="btn btn-primary">Get Started</button>
