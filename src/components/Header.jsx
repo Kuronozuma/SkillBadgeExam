@@ -3,22 +3,22 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { auth } from '../services/auth'
 import '../styles/components/Header.css'
 
-export default function Header(){
+export default function Header() {
   const navigate = useNavigate()
   const location = useLocation()
   const user = auth.getUser()
   const onLogout = () => { auth.logout(); navigate('/login') }
   const authed = auth.isAuthenticated()
-  
+
   // Function to check if link is active
   const isActive = (path) => {
     return location.pathname === path ? 'active' : ''
   }
-  
+
   return (
     <header className="header">
       <div className="logo">Inventory App</div>
-      {authed ? (
+      {/* {authed ? (
         <nav className="nav">
           <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
           <Link to="/inventory" className={isActive('/inventory')}>Inventory</Link>
@@ -27,7 +27,7 @@ export default function Header(){
           <Link to="/warehouse" className={isActive('/warehouse')}>Warehouse</Link>
           <Link to="/reports" className={isActive('/reports')}>Reports</Link>
         </nav>
-      ) : null}
+      ) : null} */}
       <div className="header-right">
         {user ? <span>Hi, {user.username}</span> : null}
         {authed ? <button onClick={onLogout}>Logout</button> : <Link to="/login">Login</Link>}

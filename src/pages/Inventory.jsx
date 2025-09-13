@@ -43,10 +43,10 @@ export default function Inventory() {
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const parsedValue = name === 'stock' || name === 'price' 
+    const parsedValue = name === 'stock' || name === 'price'
       ? parseFloat(value) || 0
       : value;
-    
+
     setFormData({
       ...formData,
       [name]: parsedValue
@@ -89,7 +89,7 @@ export default function Inventory() {
         // Create new item
         await api.createInventoryItem(formData);
       }
-      
+
       setShowModal(false);
       fetchInventory(); // Refresh inventory list
     } catch (error) {
@@ -114,7 +114,7 @@ export default function Inventory() {
   return (
     <div>
       <h2>Inventory Management</h2>
-      
+
       {/* Search and Add Controls */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div style={{ width: '60%' }}>
@@ -123,8 +123,8 @@ export default function Inventory() {
             placeholder="Search by name, category or supplier..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ 
-              width: '100%', 
+            style={{
+              width: '100%',
               padding: '12px',
               borderRadius: '8px',
               background: 'rgba(255, 255, 255, 0.05)',
@@ -132,7 +132,7 @@ export default function Inventory() {
             }}
           />
         </div>
-        <button 
+        <button
           onClick={openCreateModal}
           style={{
             padding: '12px 20px',
@@ -142,7 +142,7 @@ export default function Inventory() {
           + Add New Item
         </button>
       </div>
-      
+
       {/* Loading State */}
       {isLoading ? (
         <div className="loading-container">
@@ -190,13 +190,13 @@ export default function Inventory() {
                         <td>{item.id}</td>
                         <td style={{ fontWeight: '500' }}>{item.name}</td>
                         <td>{item.category}</td>
-                        <td style={{ 
+                        <td style={{
                           color: item.stock < 20 ? 'var(--error)' : 'inherit',
                           fontWeight: item.stock < 20 ? '600' : 'inherit'
                         }}>
                           {item.stock}
                         </td>
-                        <td>${item.price?.toFixed(2) || '0.00'}</td>
+                        <td>₱{item.price?.toFixed(2) || '0.00'}</td>
                         <td>{item.ordered}</td>
                         <td>{item.supplier || 'N/A'}</td>
                         <td>
@@ -234,7 +234,7 @@ export default function Inventory() {
           )}
         </>
       )}
-      
+
       {/* Edit/Create Modal */}
       {showModal && (
         <div style={{
@@ -257,15 +257,15 @@ export default function Inventory() {
             padding: '25px',
             boxShadow: '0 15px 30px rgba(0, 0, 0, 0.3)'
           }}>
-            <h3 style={{ 
-              marginTop: 0, 
-              color: 'var(--accent)', 
-              borderBottom: '1px solid var(--border)', 
-              paddingBottom: '10px' 
+            <h3 style={{
+              marginTop: 0,
+              color: 'var(--accent)',
+              borderBottom: '1px solid var(--border)',
+              paddingBottom: '10px'
             }}>
               {currentItem ? 'Edit Item' : 'Add New Item'}
             </h3>
-            
+
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', marginBottom: '5px', color: 'var(--text-secondary)' }}>
                 Name
@@ -278,7 +278,7 @@ export default function Inventory() {
                 required
               />
             </div>
-            
+
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', marginBottom: '5px', color: 'var(--text-secondary)' }}>
                 Category
@@ -291,7 +291,7 @@ export default function Inventory() {
                 required
               />
             </div>
-            
+
             <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', marginBottom: '5px', color: 'var(--text-secondary)' }}>
@@ -321,7 +321,7 @@ export default function Inventory() {
                 />
               </div>
             </div>
-            
+
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '5px', color: 'var(--text-secondary)' }}>
                 Supplier
@@ -333,7 +333,7 @@ export default function Inventory() {
                 placeholder="Supplier name"
               />
             </div>
-            
+
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '25px' }}>
               <button
                 onClick={() => setShowModal(false)}
