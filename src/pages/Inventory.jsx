@@ -174,7 +174,7 @@ export default function Inventory() {
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>SKU</th>
+                      <th>Product ID</th>
                       <th>Name</th>
                       <th>Category</th>
                       <th>Stock</th>
