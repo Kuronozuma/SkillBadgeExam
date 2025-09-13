@@ -17,20 +17,21 @@ export default function Header() {
 
   return (
     <header className="header">
-      <div className="logo">Inventory App</div>
-      {/* {authed ? (
-        <nav className="nav">
-          <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
-          <Link to="/inventory" className={isActive('/inventory')}>Inventory</Link>
-          <Link to="/customers" className={isActive('/customers')}>Customers</Link>
-          <Link to="/distributors" className={isActive('/distributors')}>Distributors</Link>
-          <Link to="/warehouse" className={isActive('/warehouse')}>Warehouse</Link>
-          <Link to="/reports" className={isActive('/reports')}>Reports</Link>
-        </nav>
-      ) : null} */}
+      {/* Graffiti-styled logo */}
+      <div className="logo">Wyart Vape Shop</div>
+
       <div className="header-right">
         {user ? <span>Hi, {user.username}</span> : null}
-        {authed ? <button onClick={onLogout}>Logout</button> : <Link to="/login">Login</Link>}
+
+        {/* Divider */}
+        <div className="divider"></div>
+
+        {/* Auth button */}
+        {authed ? (
+          <button className="logout-btn" onClick={onLogout}>Logout</button>
+        ) : (
+          <Link className="login-btn" to="/login">Login</Link>
+        )}
       </div>
     </header>
   )

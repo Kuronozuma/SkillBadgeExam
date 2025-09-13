@@ -8,13 +8,11 @@ export default function LandingPage() {
   return (
     <div className="landing-container">
       <header className="header">
-        <h1>Inventory App</h1>
         <nav>
           <a href="#">Home</a>
           <a href="#">Features</a>
           <a href="#">About</a>
           <a href="#">Contact</a>
-          <a href="dashboard.html" className="btn btn-primary">Login</a>
         </nav>
       </header>
 
