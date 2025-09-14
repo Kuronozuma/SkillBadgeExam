@@ -20,17 +20,65 @@ const apiRequest = async (endpoint, options = {}) => {
     ...options
   };
 
+  console.log(`API Request: ${options.method || 'GET'} ${url}`);
+  console.log('Request headers:', config.headers);
+  
   try {
+    // Check if the backend is running before making the request
+    if (!window.backendChecked) {
+      try {
+        // Try to fetch server status
+        const checkUrl = API_BASE_URL.replace(/\/api$/, '') + '/health';
+        console.log(`Checking backend health at: ${checkUrl}`);
+        const healthCheck = await fetch(checkUrl, { 
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          mode: 'cors'
+        });
+        
+        if (healthCheck.ok) {
+          const healthData = await healthCheck.json();
+          console.log('Backend health check:', healthData);
+          window.backendChecked = true;
+        } else {
+          console.warn('Backend health check failed with status:', healthCheck.status);
+        }
+      } catch (healthError) {
+        console.error('Backend appears to be offline:', healthError);
+        throw new Error('Backend server appears to be offline. Please make sure it is running.');
+      }
+    }
+    
+    // Proceed with the actual request
     const response = await fetch(url, config);
-    const data = await response.json();
+    
+    // Handle network errors
+    if (!response) {
+      throw new Error('Network response was not received');
+    }
+    
+    console.log(`Response status: ${response.status} ${response.statusText}`);
+    
+    // Try to parse response as JSON
+    let data;
+    try {
+      data = await response.json();
+      console.log('Response data:', data);
+    } catch (parseError) {
+      console.error('Failed to parse response as JSON:', parseError);
+      throw new Error('Invalid response format');
+    }
 
+    // Handle error status codes
     if (!response.ok) {
-      throw new Error(data.message || `HTTP error! status: ${response.status}`);
+      const errorMsg = data?.message || `HTTP error! status: ${response.status}`;
+      console.error(`API error (${response.status}):`, errorMsg);
+      throw new Error(errorMsg);
     }
 
     return data;
   } catch (error) {
-    console.error('API request failed:', error);
+    console.error(`API request failed for ${endpoint}:`, error);
     throw error;
   }
 };
@@ -87,17 +135,52 @@ export const api = {
   // Inventory specific operations
   fetchInventory: async (params = {}) => {
     try {
+      console.log('Fetching inventory with params:', params);
       const queryString = new URLSearchParams(params).toString();
-      const response = await apiRequest(`/inventory${queryString ? `?${queryString}` : ''}`);
-      if (!response) return [];
-      if (Array.isArray(response)) return response;
-      if (response.data && Array.isArray(response.data.items)) return response.data.items;
-      if (Array.isArray(response.data)) return response.data;
-      if (Array.isArray(response.items)) return response.items;
-      // Fallback: try to find items nested arbitrarily
-      return (response.data && response.data.items) || response.items || [];
+      const url = `/inventory${queryString ? `?${queryString}` : ''}`;
+      console.log('Inventory API URL:', url);
+      
+      try {
+        const response = await apiRequest(url);
+        console.log('Raw inventory API response:', response);
+        
+        // Handle different response formats
+        if (!response) {
+          console.warn('Empty response from inventory API');
+          return [];
+        }
+        
+        if (Array.isArray(response)) {
+          console.log('Response is an array with', response.length, 'items');
+          return response;
+        }
+        
+        if (response.data && Array.isArray(response.data.items)) {
+          console.log('Found items array in response.data.items');
+          return response.data.items;
+        }
+        
+        if (Array.isArray(response.data)) {
+          console.log('Found items array in response.data');
+          return response.data;
+        }
+        
+        if (Array.isArray(response.items)) {
+          console.log('Found items array in response.items');
+          return response.items;
+        }
+        
+        // Fallback: try to find items nested arbitrarily
+        const result = (response.data && response.data.items) || response.items || [];
+        console.log('Using fallback result with', result.length, 'items');
+        return result;
+      } catch (apiError) {
+        console.error('API request failed:', apiError);
+        throw apiError;
+      }
     } catch (error) {
       console.error('Inventory API error:', error);
+      // Let the component handle this error and potentially show mock data
       throw error;
     }
   },

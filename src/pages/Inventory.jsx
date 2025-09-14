@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import Card from '../components/Card';
+import ErrorBoundary from '../components/ErrorBoundary';
+import '../styles/pages/Inventory.css';
 
-export default function Inventory() {
+function Inventory() {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,22 +21,40 @@ export default function Inventory() {
 
   // Load inventory data
   useEffect(() => {
+    // Start with an empty inventory and try to fetch from API
     fetchInventory();
   }, []);
+
+  // No mock data - starting with empty inventory
 
   const fetchInventory = async () => {
     setIsLoading(true);
     setError(null);
+    
     try {
-
+      // Attempt to fetch data from API
+      console.log('Attempting to fetch inventory from API...');
       const data = await api.fetchInventory();
-      setItems(Array.isArray(data) ? data : (data?.items || []));
-      setIsLoading(false);
       console.log('Inventory data received:', data);
+      
+      // Handle different response formats
+      if (Array.isArray(data)) {
+        setItems(data);
+      } else if (data?.items && Array.isArray(data.items)) {
+        setItems(data.items);
+      } else if (data?.data?.items && Array.isArray(data.data.items)) {
+        setItems(data.data.items);
+      } else if (data?.data && Array.isArray(data.data)) {
+        setItems(data.data);
+      } else {
+        // Fallback to empty array if we can't find items
+        console.warn('Unexpected data format from API:', data);
+        setItems([]);
+      }
     } catch (error) {
-      console.error('Failed to load inventory:', error);
+      console.error('Failed to load inventory from API:', error);
       setError(error.message || 'Failed to load inventory data');
-      setItems([]); // Set empty array on error
+      setItems([]); // Start with an empty inventory
     } finally {
       setIsLoading(false);
     }
@@ -119,30 +139,18 @@ export default function Inventory() {
   };
 
   return (
-    <div>
-      <h2>Inventory Management</h2>
+    <div className="inventory-container">
+      <div className="inventory-title-row">
+        <h2>Inventory Management</h2>
+      </div>
 
       {/* Error Display */}
       {error && (
         <Card>
-          <div style={{ 
-            color: 'var(--error)', 
-            padding: '16px', 
-            textAlign: 'center',
-            background: 'rgba(255, 107, 107, 0.1)',
-            borderRadius: '8px',
-            marginBottom: '20px'
-          }}>
+          <div className="error-message">
             <strong>Error:</strong> {error}
-            <div style={{ marginTop: '8px' }}>
-              <button onClick={fetchInventory} style={{ 
-                padding: '8px 16px', 
-                background: 'var(--accent)', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}>
+            <div>
+              <button onClick={fetchInventory} className="retry-button">
                 Retry
               </button>
             </div>
@@ -151,28 +159,19 @@ export default function Inventory() {
       )}
 
       {/* Search and Add Controls */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <div style={{ width: '60%' }}>
+      <div className="inventory-header">
+        <div className="search-container">
           <input
             type="text"
             placeholder="Search by name, category or supplier..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px',
-              borderRadius: '8px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid var(--border)'
-            }}
+            className="search-input"
           />
         </div>
         <button
           onClick={openCreateModal}
-          style={{
-            padding: '12px 20px',
-            fontWeight: '600'
-          }}
+          className="add-button"
         >
           + Add New Item
         </button>
@@ -190,9 +189,9 @@ export default function Inventory() {
           {/* No Results */}
           {filteredItems.length === 0 ? (
             <Card>
-              <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-                <h3 style={{ marginBottom: '10px', color: 'var(--accent)' }}>No Items Found</h3>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+              <div className="empty-state">
+                <h3>No Items Found</h3>
+                <p>
                   {items.length === 0
                     ? "Your inventory is empty. Click 'Add New Item' to add your first inventory item."
                     : "No items match your search criteria. Try adjusting your search."}
@@ -205,7 +204,7 @@ export default function Inventory() {
           ) : (
             // Inventory Table
             <Card>
-              <div style={{ overflowX: 'auto' }}>
+              <div className="inventory-table">
                 <table className="table">
                   <thead>
                     <tr>
@@ -223,38 +222,25 @@ export default function Inventory() {
                     {filteredItems.map(item => (
                       <tr key={item.id}>
                         <td>{item.id}</td>
-                        <td style={{ fontWeight: '500' }}>{item.name}</td>
+                        <td className="item-name">{item.name}</td>
                         <td>{item.category}</td>
-                        <td style={{
-                          color: item.stock < (item.minStockLevel || 20) ? 'var(--error)' : 'inherit',
-                          fontWeight: item.stock < (item.minStockLevel || 20) ? '600' : 'inherit'
-                        }}>
+                        <td className={item.stock < (item.minStockLevel || 20) ? 'low-stock' : ''}>
                           {item.stock}
                         </td>
-                        <td>₱{item.price?.toFixed(2) || '0.00'}</td>
+                        <td>₱{typeof item.price === 'number' ? item.price.toFixed(2) : '0.00'}</td>
                         <td>{item.ordered || 0}</td>
                         <td>{item.distributor?.name || 'N/A'}</td>
                         <td>
-                          <div style={{ display: 'flex', gap: '8px' }}>
+                          <div className="action-buttons">
                             <button
                               onClick={() => openEditModal(item)}
-                              style={{
-                                padding: '4px 8px',
-                                background: 'rgba(102, 178, 255, 0.1)',
-                                color: 'var(--accent)',
-                                border: '1px solid var(--accent)'
-                              }}
+                              className="edit-button"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => deleteItem(item.id)}
-                              style={{
-                                padding: '4px 8px',
-                                background: 'rgba(255, 107, 107, 0.1)',
-                                color: 'var(--error)',
-                                border: '1px solid var(--error)'
-                              }}
+                              className="delete-button"
                             >
                               Delete
                             </button>
@@ -272,37 +258,14 @@ export default function Inventory() {
 
       {/* Edit/Create Modal */}
       {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: 'rgba(0, 0, 0, 0.7)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            width: '100%',
-            maxWidth: '500px',
-            background: 'linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end))',
-            borderRadius: '10px',
-            padding: '25px',
-            boxShadow: '0 15px 30px rgba(0, 0, 0, 0.3)'
-          }}>
-            <h3 style={{
-              marginTop: 0,
-              color: 'var(--accent)',
-              borderBottom: '1px solid var(--border)',
-              paddingBottom: '10px'
-            }}>
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3 className="modal-header">
               {currentItem ? 'Edit Item' : 'Add New Item'}
             </h3>
 
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '5px', color: 'var(--text-secondary)' }}>
+            <div className="form-group">
+              <label className="form-label">
                 Name
               </label>
               <input
@@ -314,8 +277,8 @@ export default function Inventory() {
               />
             </div>
 
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '5px', color: 'var(--text-secondary)' }}>
+            <div className="form-group">
+              <label className="form-label">
                 Category
               </label>
               <input
@@ -327,9 +290,9 @@ export default function Inventory() {
               />
             </div>
 
-            <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: '5px', color: 'var(--text-secondary)' }}>
+            <div className="form-row">
+              <div className="form-column">
+                <label className="form-label">
                   Stock
                 </label>
                 <input
@@ -341,8 +304,8 @@ export default function Inventory() {
                   min="0"
                 />
               </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: '5px', color: 'var(--text-secondary)' }}>
+              <div className="form-column">
+                <label className="form-label">
                   Price
                 </label>
                 <input
@@ -357,8 +320,8 @@ export default function Inventory() {
               </div>
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '5px', color: 'var(--text-secondary)' }}>
+            <div className="form-group">
+              <label className="form-label">
                 Supplier
               </label>
               <input
@@ -369,15 +332,10 @@ export default function Inventory() {
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '25px' }}>
+            <div className="modal-actions">
               <button
                 onClick={() => setShowModal(false)}
-                style={{
-                  padding: '10px 16px',
-                  background: 'transparent',
-                  color: 'var(--text-secondary)',
-                  border: '1px solid var(--border)'
-                }}
+                className="cancel-button"
               >
                 Cancel
               </button>
@@ -392,5 +350,13 @@ export default function Inventory() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function InventoryWithErrorBoundary() {
+  return (
+    <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
+      <Inventory />
+    </ErrorBoundary>
   );
 }
