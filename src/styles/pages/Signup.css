@@ -1,0 +1,122 @@
+/* Signup page styles */
+.form-title {
+  text-align: center;
+  margin-top: 0;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.form-group.half {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+
+.required {
+  color: var(--error);
+  margin-left: 3px;
+}
+
+.form-error {
+  color: var(--error);
+  background-color: rgba(255, 107, 107, 0.1);
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.form-button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 4px;
+  background-color: var(--accent);
+  color: white;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.form-button:hover {
+  background-color: var(--accent-hover);
+}
+
+.form-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.form-footer {
+  text-align: center;
+  margin-top: 16px;
+  color: var(--text-secondary);
+}
+
+.form-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.form-link:hover {
+  text-decoration: underline;
+}
+
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.form-button {
+  flex: 1;
+  padding: 10px 16px;
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.form-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.form-link-button {
+  flex: 1;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(102, 178, 255, 0.1);
+  color: var(--accent);
+  border-radius: 6px;
+  text-decoration: none;
+  border: 1px solid var(--accent);
+  font-weight: 600;
+  text-align: center;
+}

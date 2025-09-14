@@ -114,6 +114,24 @@
   overflow-x: auto;
 }
 
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  background: rgba(102, 178, 255, 0.1);
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+
+.table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
 .low-stock {
   color: var(--error);
   font-weight: 600;
@@ -121,6 +139,11 @@
 
 .table td.item-name {
   font-weight: 500;
+  max-width: 200px;
+}
+
+.table td.price-text {
+  white-space: nowrap;
 }
 
 .action-buttons {

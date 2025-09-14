@@ -25,23 +25,50 @@ const apiRequest = async (endpoint, options = {}) => {
   
   try {
     // Check if the backend is running before making the request
-    if (!window.backendChecked) {
+    // Skip health check for auth endpoints to prevent login issues
+    const isAuthEndpoint = endpoint.includes('/auth/');
+    
+    if (!window.backendChecked && !isAuthEndpoint) {
       try {
-        // Try to fetch server status
-        const checkUrl = API_BASE_URL.replace(/\/api$/, '') + '/health';
-        console.log(`Checking backend health at: ${checkUrl}`);
-        const healthCheck = await fetch(checkUrl, { 
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          mode: 'cors'
-        });
+        // Try to fetch server status - first try inventory test endpoint
+        console.log('Checking if backend is online...');
         
-        if (healthCheck.ok) {
-          const healthData = await healthCheck.json();
-          console.log('Backend health check:', healthData);
-          window.backendChecked = true;
-        } else {
-          console.warn('Backend health check failed with status:', healthCheck.status);
+        // Try inventory test endpoint first (doesn't require auth)
+        const testUrl = `${API_BASE_URL}/inventory/test`;
+        console.log(`Checking backend using test endpoint: ${testUrl}`);
+        
+        try {
+          const testCheck = await fetch(testUrl, { 
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            mode: 'cors'
+          });
+          
+          if (testCheck.ok) {
+            const testData = await testCheck.json();
+            console.log('Backend test succeeded:', testData);
+            window.backendChecked = true;
+          } else {
+            console.warn('Backend test endpoint failed, trying health endpoint');
+            throw new Error('Test endpoint failed');
+          }
+        } catch (testError) {
+          // Fallback to health check endpoint
+          const healthUrl = API_BASE_URL.replace(/\/api$/, '') + '/health';
+          console.log(`Trying health endpoint: ${healthUrl}`);
+          const healthCheck = await fetch(healthUrl, { 
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            mode: 'cors'
+          });
+          
+          if (healthCheck.ok) {
+            const healthData = await healthCheck.json();
+            console.log('Health check succeeded:', healthData);
+            window.backendChecked = true;
+          } else {
+            console.warn('Health check failed with status:', healthCheck.status);
+          }
         }
       } catch (healthError) {
         console.error('Backend appears to be offline:', healthError);

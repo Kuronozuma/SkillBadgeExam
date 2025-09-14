@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../services/api'
 import Card from '../components/Card'
+import { mockVapeCatalogue } from '../data/mockVapeData'
 import '../styles/pages/Dashboard.css'
 
 export default function Dashboard() {
@@ -9,16 +10,53 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    api.fetchDashboard()
-      .then(data => {
-        setData(data)
-        setIsLoading(false)
-      })
-      .catch(err => {
-        console.error("Failed to load dashboard data:", err)
-        setIsLoading(false)
-      })
+    // Create dashboard data from mock vape catalogue
+    setTimeout(() => {
+      // Process the mock data to create dashboard metrics
+      const dashboardData = processMockDataForDashboard(mockVapeCatalogue);
+      setData(dashboardData);
+      setIsLoading(false);
+    }, 800); // Simulate API delay
   }, [])
+  
+  // Helper function to process mock data
+  const processMockDataForDashboard = (catalogue) => {
+    // Extract all types/categories
+    const allTypes = [...new Set(catalogue.map(item => item.type))];
+    
+    // Calculate low stock items
+    const lowStockItems = catalogue.filter(item => item.stock < 10);
+    
+    // Sort by price (using min price)
+    const byPrice = [...catalogue].sort((a, b) => (b.price.min) - (a.price.min));
+    const mostExpensive = byPrice.slice(0, 3);
+    const leastExpensive = [...byPrice].reverse().slice(0, 3);
+    
+    // Sort by stock
+    const byStock = [...catalogue].sort((a, b) => b.stock - a.stock);
+    
+    // Calculate nicotine strength distribution
+    const nicotineTypes = {};
+    catalogue.forEach(item => {
+      const strengths = item.nicotineStrength.split('/');
+      strengths.forEach(s => {
+        const clean = s.trim();
+        nicotineTypes[clean] = (nicotineTypes[clean] || 0) + 1;
+      });
+    });
+    
+    return {
+      totalItems: catalogue.length,
+      lowStockItems,
+      types: allTypes,
+      topSellingItems: byStock.slice(0, 5),
+      mostExpensiveItems: mostExpensive,
+      leastExpensiveItems: leastExpensive,
+      nicotineDistribution: Object.entries(nicotineTypes)
+        .map(([strength, count]) => ({ strength, count }))
+        .sort((a, b) => b.count - a.count)
+    };
+  }
 
   if (isLoading) {
     return (
@@ -35,52 +73,90 @@ export default function Dashboard() {
   }
 
   return (
-    <div>
-      <h2>Dashboard Overview</h2>
-      <div className="grid">
-        <Card title="Most Ordered Item">
-          <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>{data.most?.name || 'N/A'}</div>
-          <div style={{ color: 'var(--accent)', fontWeight: 500 }}>{data.most?.ordered || 0} orders</div>
+    <div className="dashboard-container">
+      <h2>Vape Shop Dashboard</h2>
+      
+      <div className="dashboard-grid">
+        <Card title="Inventory Overview">
+          <div className="stat-large">{data.totalItems}</div>
+          <div className="stat-label">Total Products</div>
+          <div className="stat-warning">
+            {data.lowStockItems.length} items with low stock
+          </div>
         </Card>
 
-        <Card title="Least Ordered Item">
-          <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>{data.least?.name || 'N/A'}</div>
-          <div style={{ color: 'var(--accent)', fontWeight: 500 }}>{data.least?.ordered || 0} orders</div>
+        <Card title="Product Types">
+          <div className="tag-cloud">
+            {data.types.map((type, index) => (
+              <div key={index} className="product-type-tag">
+                {type}
+              </div>
+            ))}
+          </div>
         </Card>
 
-        <Card title="Top Customer">
-          <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>{data.topCustomer?.name || 'N/A'}</div>
-          <div style={{ color: 'var(--accent)', fontWeight: 500 }}>{data.topCustomer?.orders || 0} orders</div>
-        </Card>
-
-        <Card title="Product Categories">
-          <div style={{ color: 'var(--text-secondary)', fontSize: 16 }}>
-            {data.categories?.join(', ') || 'No categories'}
+        <Card title="Nicotine Strengths">
+          <div className="nic-distribution">
+            {data.nicotineDistribution.slice(0, 5).map((item, index) => (
+              <div key={index} className="nic-item">
+                <span className="nic-strength">{item.strength}</span>
+                <div className="nic-bar" style={{ width: `${Math.min(100, item.count * 10)}%` }}></div>
+                <span className="nic-count">{item.count}</span>
+              </div>
+            ))}
           </div>
         </Card>
       </div>
 
-      <div style={{ marginTop: 24 }}>
-        <Card title="Top Performing Items">
-          <ul>
-            {data.topItems?.map(item => (
-              <li key={item.id}>
-                <span style={{ color: 'var(--text)', fontWeight: 500 }}>{item.name}</span>
-                <span style={{ color: 'var(--accent)', marginLeft: 8 }}>— {item.ordered} orders</span>
-              </li>
+      <div className="dashboard-grid-2">
+        <Card title="Most Expensive Products">
+          <div className="product-list">
+            {data.mostExpensiveItems.map((item, index) => (
+              <div key={index} className="product-list-item">
+                <div className="product-name">{item.name}</div>
+                <div className="product-price">{item.priceText}</div>
+              </div>
             ))}
-          </ul>
-          <div style={{ marginTop: '20px', textAlign: 'right' }}>
-            <Link to="/inventory" style={{
-              display: 'inline-block',
-              padding: '8px 16px',
-              background: 'rgba(102, 178, 255, 0.1)',
-              color: 'var(--accent)',
-              borderRadius: '6px',
-              textDecoration: 'none',
-              border: '1px solid var(--accent)',
-              fontWeight: '500'
-            }}>
+          </div>
+        </Card>
+
+        <Card title="Least Expensive Products">
+          <div className="product-list">
+            {data.leastExpensiveItems.map((item, index) => (
+              <div key={index} className="product-list-item">
+                <div className="product-name">{item.name}</div>
+                <div className="product-price">{item.priceText}</div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      <div className="full-width">
+        <Card title="Top Stock Products">
+          <div className="stock-items">
+            {data.topSellingItems.map(item => (
+              <div key={item.id} className="stock-item">
+                <div className="stock-item-header">
+                  <div className="stock-item-name">{item.name}</div>
+                  <div className="stock-item-count">{item.stock}</div>
+                </div>
+                <div className="stock-bar-container">
+                  <div 
+                    className="stock-bar" 
+                    style={{ width: `${Math.min(100, item.stock / 50 * 100)}%` }}
+                  ></div>
+                </div>
+                <div className="stock-item-footer">
+                  <div className="stock-item-type">{item.type}</div>
+                  <div className="stock-item-brand">{item.brand}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="dashboard-action">
+            <Link to="/inventory" className="manage-link">
               Manage Inventory →
             </Link>
           </div>

@@ -1,9 +1,13 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { auth } from '../services/auth'
+import '../styles/pages/Signup.css'
 
 export default function Signup(){
   const [user, setUser] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
   const [pass, setPass] = useState('')
   const [confirmPass, setConfirmPass] = useState('')
   const [error, setError] = useState('')
@@ -30,9 +34,23 @@ export default function Signup(){
       return;
     }
     
+    if(email && !email.includes('@')) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
     setIsLoading(true)
     try {
-      await auth.signup(user, pass)
+      // Create user data object with all fields
+      const userData = {
+        username: user,
+        password: pass,
+        email: email || undefined,
+        firstName: firstName || undefined,
+        lastName: lastName || undefined
+      };
+      
+      await auth.signup(userData)
       navigate('/dashboard')
     } catch(err) { 
       setError(err.message || 'Signup failed. Please try again.') 
@@ -44,23 +62,67 @@ export default function Signup(){
     <div className="unauthenticated-wrapper">
       <div className="login-card-container">
         <div className="card">
-          <h2 style={{textAlign: 'center', marginTop: 0}}>Create Account</h2>
+          <h2 className="form-title">Create Account</h2>
           <form onSubmit={onSubmit}>
-            <div style={{marginBottom: '16px'}}>
-              <label style={{display: 'block', marginBottom: '8px', color: 'var(--text-secondary)'}}>
-                Username
+            <div className="form-group">
+              <label className="form-label">
+                Username <span className="required">*</span>
               </label>
               <input 
                 value={user} 
                 onChange={e => setUser(e.target.value)} 
                 placeholder="Choose a username"
                 disabled={isLoading}
+                className="form-input"
+                required
               />
             </div>
             
-            <div style={{marginBottom: '16px'}}>
-              <label style={{display: 'block', marginBottom: '8px', color: 'var(--text-secondary)'}}>
-                Password
+            <div className="form-group">
+              <label className="form-label">
+                Email
+              </label>
+              <input 
+                type="email"
+                value={email} 
+                onChange={e => setEmail(e.target.value)} 
+                placeholder="Your email address"
+                disabled={isLoading}
+                className="form-input"
+              />
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group half">
+                <label className="form-label">
+                  First Name
+                </label>
+                <input 
+                  value={firstName} 
+                  onChange={e => setFirstName(e.target.value)} 
+                  placeholder="First name"
+                  disabled={isLoading}
+                  className="form-input"
+                />
+              </div>
+              
+              <div className="form-group half">
+                <label className="form-label">
+                  Last Name
+                </label>
+                <input 
+                  value={lastName} 
+                  onChange={e => setLastName(e.target.value)} 
+                  placeholder="Last name"
+                  disabled={isLoading}
+                  className="form-input"
+                />
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">
+                Password <span className="required">*</span>
               </label>
               <input 
                 type="password" 
@@ -68,12 +130,14 @@ export default function Signup(){
                 onChange={e => setPass(e.target.value)} 
                 placeholder="Create a password"
                 disabled={isLoading}
+                className="form-input"
+                required
               />
             </div>
             
-            <div style={{marginBottom: '16px'}}>
-              <label style={{display: 'block', marginBottom: '8px', color: 'var(--text-secondary)'}}>
-                Confirm Password
+            <div className="form-group">
+              <label className="form-label">
+                Confirm Password <span className="required">*</span>
               </label>
               <input 
                 type="password" 
@@ -81,31 +145,21 @@ export default function Signup(){
                 onChange={e => setConfirmPass(e.target.value)} 
                 placeholder="Confirm your password"
                 disabled={isLoading}
+                className="form-input"
+                required
               />
             </div>
             
             {error ? (
-              <div style={{
-                color: '#ff6b6b', 
-                marginTop: '12px', 
-                padding: '8px', 
-                borderRadius: '4px',
-                background: 'rgba(255, 107, 107, 0.1)',
-                marginBottom: '16px'
-              }}>
+              <div className="form-error">
                 {error}
               </div>
             ) : null}
             
-            <div style={{ 
-              marginTop: '20px', 
-              display: 'flex', 
-              gap: '12px',
-              justifyContent: 'space-between'
-            }}>
+            <div className="form-actions">
               <button 
-                type="submit" 
-                style={{flex: 1}}
+                type="submit"
+                className="form-button"
                 disabled={isLoading}
               >
                 {isLoading ? 'Creating account...' : 'Create account'}
@@ -113,20 +167,7 @@ export default function Signup(){
               
               <Link 
                 to="/login" 
-                style={{
-                  flex: 1,
-                  display: 'inline-flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: '10px 16px',
-                  background: 'rgba(102, 178, 255, 0.1)',
-                  color: 'var(--accent)',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  border: '1px solid var(--accent)',
-                  fontWeight: '600',
-                  textAlign: 'center'
-                }}
+                className="form-link-button"
               >
                 Back to login
               </Link>

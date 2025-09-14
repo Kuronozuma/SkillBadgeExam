@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import Card from '../components/Card';
 import ErrorBoundary from '../components/ErrorBoundary';
+import { mockVapeCatalogue } from '../data/mockVapeData';
 import '../styles/pages/Inventory.css';
 
 function Inventory() {
@@ -13,9 +14,14 @@ function Inventory() {
   const [currentItem, setCurrentItem] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    category: '',
+    brand: '',
+    type: '',
+    flavor: '',
+    nicotineStrength: '',
+    priceText: '',
+    priceMin: 0,
+    priceMax: 0,
     stock: 0,
-    price: 0,
     supplier: ''
   });
 
@@ -32,29 +38,49 @@ function Inventory() {
     setError(null);
     
     try {
-      // Attempt to fetch data from API
-      console.log('Attempting to fetch inventory from API...');
-      const data = await api.fetchInventory();
-      console.log('Inventory data received:', data);
-      
-      // Handle different response formats
-      if (Array.isArray(data)) {
-        setItems(data);
-      } else if (data?.items && Array.isArray(data.items)) {
-        setItems(data.items);
-      } else if (data?.data?.items && Array.isArray(data.data.items)) {
-        setItems(data.data.items);
-      } else if (data?.data && Array.isArray(data.data)) {
-        setItems(data.data);
-      } else {
-        // Fallback to empty array if we can't find items
-        console.warn('Unexpected data format from API:', data);
+      // First check if user is authenticated
+      const token = localStorage.getItem('inv_token');
+      if (!token) {
+        console.warn('No auth token found, user may need to login');
+        setError('Please login to view inventory items');
         setItems([]);
+        setIsLoading(false);
+        return;
       }
+      
+      // Use mock data instead of API for now
+      console.log('Using mock vape shop catalogue data');
+      setItems(mockVapeCatalogue);
+      
+      // For future real API implementation (commented for now)
+      /*
+      try {
+        const data = await api.fetchInventory();
+        console.log('Inventory data received:', data);
+        
+        // Handle different response formats
+        if (Array.isArray(data)) {
+          setItems(data);
+        } else if (data?.items && Array.isArray(data.items)) {
+          setItems(data.items);
+        } else if (data?.data?.items && Array.isArray(data.data.items)) {
+          setItems(data.data.items);
+        } else if (data?.data && Array.isArray(data.data)) {
+          setItems(data.data);
+        } else {
+          console.warn('Unexpected data format from API:', data);
+          setItems([]);
+        }
+      } catch (apiError) {
+        console.error('API fetch failed:', apiError);
+        throw apiError;
+      }
+      */
+      
     } catch (error) {
-      console.error('Failed to load inventory from API:', error);
-      setError(error.message || 'Failed to load inventory data');
-      setItems([]); // Start with an empty inventory
+      console.error('Failed to load inventory data:', error);
+      setError('Failed to load inventory data. Please try again.');
+      setItems([]); // Use empty inventory on error
     } finally {
       setIsLoading(false);
     }
@@ -63,8 +89,11 @@ function Inventory() {
   // Filter items based on search query
   const filteredItems = items.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.supplier?.toLowerCase().includes(searchQuery.toLowerCase())
+    item.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.flavor.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.nicotineStrength.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (item.supplier && item.supplier.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   // Handle form input changes
@@ -85,9 +114,14 @@ function Inventory() {
     setCurrentItem(null);
     setFormData({
       name: '',
-      category: '',
+      brand: '',
+      type: '',
+      flavor: '',
+      nicotineStrength: '',
+      priceText: '',
+      priceMin: 0,
+      priceMax: 0,
       stock: 0,
-      price: 0,
       supplier: ''
     });
     setShowModal(true);
@@ -98,9 +132,14 @@ function Inventory() {
     setCurrentItem(item);
     setFormData({
       name: item.name,
-      category: item.category,
+      brand: item.brand || '',
+      type: item.type || '',
+      flavor: item.flavor || '',
+      nicotineStrength: item.nicotineStrength || '',
+      priceText: item.priceText || '',
+      priceMin: item.price?.min || 0,
+      priceMax: item.price?.max || 0,
       stock: item.stock || 0,
-      price: item.price || 0,
       supplier: item.supplier || ''
     });
     setShowModal(true);
@@ -109,16 +148,41 @@ function Inventory() {
   // Save item (create or update)
   const saveItem = async () => {
     try {
+      // Create formatted item data from form
+      const itemData = {
+        ...formData,
+        price: {
+          min: parseInt(formData.priceMin) || 0,
+          max: parseInt(formData.priceMax) || 0
+        }
+      };
+      
+      // Remove redundant fields
+      delete itemData.priceMin;
+      delete itemData.priceMax;
+      
       if (currentItem) {
-        // Update existing item
-        await api.updateInventoryItem(currentItem.id, formData);
+        // Update existing item - for mock data, we'll update the local state directly
+        const updatedItems = items.map(item => 
+          item.id === currentItem.id ? { ...item, ...itemData } : item
+        );
+        setItems(updatedItems);
+        
+        // In a real app, we would call the API:
+        // await api.updateInventoryItem(currentItem.id, itemData);
       } else {
-        // Create new item
-        await api.createInventoryItem(formData);
+        // Create new item - for mock data, add to local state
+        const newItem = {
+          ...itemData,
+          id: Math.max(0, ...items.map(item => item.id)) + 1
+        };
+        setItems([...items, newItem]);
+        
+        // In a real app, we would call the API:
+        // await api.createInventoryItem(itemData);
       }
 
       setShowModal(false);
-      fetchInventory(); // Refresh inventory list
     } catch (error) {
       console.error('Failed to save item:', error);
       alert('Failed to save item. Please try again.');
@@ -129,8 +193,11 @@ function Inventory() {
   const deleteItem = async (id) => {
     if (confirm('Are you sure you want to delete this item?')) {
       try {
-        await api.deleteInventoryItem(id);
-        fetchInventory(); // Refresh inventory list
+        // For mock data, filter out the deleted item from local state
+        setItems(items.filter(item => item.id !== id));
+        
+        // In a real app, we would call the API:
+        // await api.deleteInventoryItem(id);
       } catch (error) {
         console.error('Failed to delete item:', error);
         alert('Failed to delete item. Please try again.');
@@ -163,7 +230,7 @@ function Inventory() {
         <div className="search-container">
           <input
             type="text"
-            placeholder="Search by name, category or supplier..."
+            placeholder="Search by name, brand, type, flavor or nicotine strength..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
@@ -208,13 +275,14 @@ function Inventory() {
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>Product ID</th>
-                      <th>Name</th>
-                      <th>Category</th>
+                      <th>#</th>
+                      <th>Product Name</th>
+                      <th>Brand/Origin</th>
+                      <th>Type</th>
+                      <th>Flavor Profile</th>
+                      <th>Nicotine Strength</th>
+                      <th>Price Range</th>
                       <th>Stock</th>
-                      <th>Price</th>
-                      <th>Orders</th>
-                      <th>Supplier</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -223,13 +291,14 @@ function Inventory() {
                       <tr key={item.id}>
                         <td>{item.id}</td>
                         <td className="item-name">{item.name}</td>
-                        <td>{item.category}</td>
-                        <td className={item.stock < (item.minStockLevel || 20) ? 'low-stock' : ''}>
+                        <td>{item.brand}</td>
+                        <td>{item.type}</td>
+                        <td>{item.flavor}</td>
+                        <td>{item.nicotineStrength}</td>
+                        <td className="price-text">{item.priceText}</td>
+                        <td className={item.stock < (item.minStockLevel || 10) ? 'low-stock' : ''}>
                           {item.stock}
                         </td>
-                        <td>₱{typeof item.price === 'number' ? item.price.toFixed(2) : '0.00'}</td>
-                        <td>{item.ordered || 0}</td>
-                        <td>{item.distributor?.name || 'N/A'}</td>
                         <td>
                           <div className="action-buttons">
                             <button
@@ -279,17 +348,97 @@ function Inventory() {
 
             <div className="form-group">
               <label className="form-label">
-                Category
+                Brand/Origin
               </label>
               <input
-                name="category"
-                value={formData.category}
+                name="brand"
+                value={formData.brand}
                 onChange={handleInputChange}
-                placeholder="Disposable, Mod, Etc."
+                placeholder="Local, Imported, etc."
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">
+                Type
+              </label>
+              <input
+                name="type"
+                value={formData.type}
+                onChange={handleInputChange}
+                placeholder="Salt Nic, Freebase, etc."
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">
+                Flavor Profile
+              </label>
+              <input
+                name="flavor"
+                value={formData.flavor}
+                onChange={handleInputChange}
+                placeholder="Describe the flavor"
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">
+                Nicotine Strength
+              </label>
+              <input
+                name="nicotineStrength"
+                value={formData.nicotineStrength}
+                onChange={handleInputChange}
+                placeholder="3mg / 6mg / 12mg, etc."
                 required
               />
             </div>
 
+            <div className="form-row">
+              <div className="form-column">
+                <label className="form-label">
+                  Min Price (₱)
+                </label>
+                <input
+                  type="number"
+                  name="priceMin"
+                  value={formData.priceMin}
+                  onChange={handleInputChange}
+                  placeholder="0"
+                  min="0"
+                />
+              </div>
+              <div className="form-column">
+                <label className="form-label">
+                  Max Price (₱)
+                </label>
+                <input
+                  type="number"
+                  name="priceMax"
+                  value={formData.priceMax}
+                  onChange={handleInputChange}
+                  placeholder="0"
+                  min="0"
+                />
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">
+                Price Text (Display Format)
+              </label>
+              <input
+                name="priceText"
+                value={formData.priceText}
+                onChange={handleInputChange}
+                placeholder="₱300-₱500 for 30-60mL"
+              />
+            </div>
+            
             <div className="form-row">
               <div className="form-column">
                 <label className="form-label">
@@ -306,30 +455,15 @@ function Inventory() {
               </div>
               <div className="form-column">
                 <label className="form-label">
-                  Price
+                  Supplier
                 </label>
                 <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
+                  name="supplier"
+                  value={formData.supplier}
                   onChange={handleInputChange}
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
+                  placeholder="Supplier name"
                 />
               </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">
-                Supplier
-              </label>
-              <input
-                name="supplier"
-                value={formData.supplier}
-                onChange={handleInputChange}
-                placeholder="Supplier name"
-              />
             </div>
 
             <div className="modal-actions">
