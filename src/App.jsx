@@ -1,14 +1,12 @@
 import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Login from './pages/Login'
 import Landing_Page from './pages/Landing_Page'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
-import Customers from './pages/Customers'
-import Distributors from './pages/Distributors'
-import Warehouse from './pages/Warehouse'
 import Reports from './pages/Reports'
 import Inventory from './pages/Inventory'
+import Orders from './pages/Orders'
 import { auth } from './services/auth'
 import Header from './components/Header'
 import Sidebar from './components/Sidebar'
@@ -55,8 +53,9 @@ function NotFound() {
 }
 
 export default function App() {
-  // Check if we're on an authentication page
-  const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/signup';
+  // Check if we're on an authentication page (use react-router location to avoid stale window.pathname)
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
 
   return (
     <div className="app">
@@ -86,24 +85,16 @@ export default function App() {
                 element={<PrivateRoute><Dashboard /></PrivateRoute>}
               />
               <Route
-                path="/customers"
-                element={<PrivateRoute><Customers /></PrivateRoute>}
+                path="/inventory"
+                element={<PrivateRoute><Inventory /></PrivateRoute>}
               />
               <Route
-                path="/distributors"
-                element={<PrivateRoute><Distributors /></PrivateRoute>}
-              />
-              <Route
-                path="/warehouse"
-                element={<PrivateRoute><Warehouse /></PrivateRoute>}
+                path="/orders"
+                element={<PrivateRoute><Orders /></PrivateRoute>}
               />
               <Route
                 path="/reports"
                 element={<PrivateRoute><Reports /></PrivateRoute>}
-              />
-              <Route
-                path="/inventory"
-                element={<PrivateRoute><Inventory /></PrivateRoute>}
               />
 
               {/* 404 fallback */}

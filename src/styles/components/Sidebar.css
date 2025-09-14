@@ -1,41 +1,106 @@
 /* Sidebar styles */
 .sidebar {
   width: 220px;
-  background: rgba(19, 47, 76, 0.4);
-  border-radius: 8px;
+  background: #001529;
+  color: #ffffff;
+  height: 100%;
+  min-height: calc(100vh - 70px);
+  position: relative;
+  border-right: 1px solid #00254d;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-header {
+  padding: 20px 15px;
+  text-align: center;
+  border-bottom: 1px solid #002647;
+}
+
+.vape-shop-title {
+  color: #8dd6ff;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .sidebar ul {
   list-style: none;
-  padding: 12px;
+  padding: 15px 0;
   margin: 0;
 }
 
 .sidebar li {
-  padding: 8px 12px;
+  padding: 12px 24px;
+  margin: 0 8px 8px 8px;
   border-radius: 6px;
-  margin-bottom: 4px;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
 }
 
 .sidebar li:hover {
-  background: var(--hover);
+  background: #0a2a43;
 }
 
 .sidebar li.active-link {
-  background: var(--hover);
+  background: rgba(102, 178, 255, 0.15);
+  position: relative;
+}
+
+.sidebar li.active-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #66b2ff;
 }
 
 .sidebar li.active-link a {
-  color: var(--accent);
+  color: #66b2ff;
   font-weight: 500;
 }
 
 .sidebar a {
-  color: var(--text-secondary);
+  color: #b3b3b3;
   text-decoration: none;
   display: block;
   transition: color 0.2s ease;
+  font-size: 15px;
+  margin-left: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.7;
+}
+
+.sidebar li.active-link .sidebar-icon {
+  opacity: 1;
+}
+
+.dashboard-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2366b2ff' viewBox='0 0 24 24'%3E%3Cpath d='M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z'/%3E%3C/svg%3E");
+}
+
+.inventory-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2366b2ff' viewBox='0 0 24 24'%3E%3Cpath d='M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z'/%3E%3C/svg%3E");
+}
+
+.orders-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2366b2ff' viewBox='0 0 24 24'%3E%3Cpath d='M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z'/%3E%3C/svg%3E");
+}
+
+.reports-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2366b2ff' viewBox='0 0 24 24'%3E%3Cpath d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z'/%3E%3C/svg%3E");
 }
 
 .sidebar a:hover {

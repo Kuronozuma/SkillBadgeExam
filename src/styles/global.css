@@ -39,9 +39,10 @@ body {
   min-height: 100vh;
 }
 
-/* Layout */
 .layout {
   display: flex;
+  flex: 1;
+  height: calc(100vh - 64px);
   gap: 20px;
   align-items: flex-start;
   padding: 24px;
@@ -50,6 +51,7 @@ body {
 /* Main content area */
 .main {
   flex: 1;
+  min-width: 0;
 }
 
 /* Page headings */

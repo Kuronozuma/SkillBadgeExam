@@ -2,7 +2,9 @@
 .reports-page {
   padding: 20px;
   max-width: 100%;
+  width: 100%;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .reports-page h1 {

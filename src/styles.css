@@ -39,6 +39,12 @@ body {
   min-height: 100vh;
 }
 
+.layout {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 64px);
+}
+
 /* Header styles */
 .header {
   display: flex;

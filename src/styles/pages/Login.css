@@ -3,7 +3,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  min-height: calc(100vh - 64px);
+  padding-top: 64px; /* account for sticky header height */
   background: linear-gradient(135deg, #1e3a8a, #8a2be2);
   padding: 20px;
 }
@@ -24,6 +25,7 @@
   font-size: 2rem;
   font-family: 'Trade Winds', cursive;
   background: linear-gradient(90deg, #ff00cc, #3333ff);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 10px;

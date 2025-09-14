@@ -1,0 +1,41 @@
+/* ErrorBoundary styles */
+.error-boundary {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.error-boundary h3 {
+  margin-bottom: 10px;
+  color: var(--error);
+  font-size: 22px;
+}
+
+.error-boundary p {
+  margin-bottom: 20px;
+  color: var(--error);
+  opacity: 0.8;
+}
+
+.error-details {
+  margin-top: 30px;
+  text-align: left;
+  background: rgba(255, 107, 107, 0.05);
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.error-details summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.error-details pre {
+  margin-top: 10px;
+  background: rgba(0,0,0,0.1);
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+  color: var(--error);
+  font-size: 14px;
+}

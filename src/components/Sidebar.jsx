@@ -15,23 +15,24 @@ export default function Sidebar(){
   
   return (
     <aside className="sidebar">
+      <div className="sidebar-header">
+        <h3 className="vape-shop-title">Vape Shop Inventory</h3>
+      </div>
       <ul>
         <li className={isActive('/dashboard')}>
+          <i className="sidebar-icon dashboard-icon"></i>
           <Link to="/dashboard">Dashboard</Link>
         </li>
         <li className={isActive('/inventory')}>
+          <i className="sidebar-icon inventory-icon"></i>
           <Link to="/inventory">Inventory</Link>
         </li>
-        <li className={isActive('/customers')}>
-          <Link to="/customers">Customers</Link>
-        </li>
-        <li className={isActive('/distributors')}>
-          <Link to="/distributors">Distributors</Link>
-        </li>
-        <li className={isActive('/warehouse')}>
-          <Link to="/warehouse">Warehouse</Link>
+        <li className={isActive('/orders')}>
+          <i className="sidebar-icon orders-icon"></i>
+          <Link to="/orders">Orders</Link>
         </li>
         <li className={isActive('/reports')}>
+          <i className="sidebar-icon reports-icon"></i>
           <Link to="/reports">Reports</Link>
         </li>
       </ul>

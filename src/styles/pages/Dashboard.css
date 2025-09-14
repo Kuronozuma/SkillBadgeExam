@@ -1,6 +1,8 @@
 /* Dashboard page styles */
 .dashboard-container {
-  padding: 10px;
+  padding: 20px;
+  width: 100%;
+  overflow-y: auto;
 }
 
 .dashboard-grid {
