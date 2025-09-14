@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import '../styles/pages/Orders.css'
 
 export default function Orders() {
-  const [orders, setOrders] = useState([
+  const initialOrders = useMemo(() => ([
     {
       id: 'ORD-001',
       customer: 'John Doe',
@@ -47,9 +47,61 @@ export default function Orders() {
         { name: 'Mint Menthol E-Liquid', quantity: 1, price: 19.98 }
       ]
     }
-  ]);
+  ]), []);
+
+  const [orders, setOrders] = useState(initialOrders);
 
   const [filterStatus, setFilterStatus] = useState('all');
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ id: '', customer: '', date: '', total: 0, status: 'pending' });
+
+  // Load from localStorage once
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('orders_data');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length) setOrders(parsed);
+      } else {
+        // seed storage on first run
+        localStorage.setItem('orders_data', JSON.stringify(initialOrders));
+      }
+    } catch (e) {
+      console.warn('Failed to load orders from storage:', e);
+    }
+  }, [initialOrders]);
+
+  // Persist on change
+  useEffect(() => {
+    try {
+      localStorage.setItem('orders_data', JSON.stringify(orders));
+    } catch (e) {
+      console.warn('Failed to save orders:', e);
+    }
+  }, [orders]);
+
+  const openEdit = (order) => {
+    setEditForm({
+      id: order.id,
+      customer: order.customer,
+      date: order.date,
+      total: order.total,
+      status: order.status,
+    });
+    setIsEditOpen(true);
+  };
+
+  const closeEdit = () => setIsEditOpen(false);
+
+  const onEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm((f) => ({ ...f, [name]: name === 'total' ? Number(value) : value }));
+  };
+
+  const saveEdit = () => {
+    setOrders((prev) => prev.map((o) => (o.id === editForm.id ? { ...o, ...editForm } : o)));
+    setIsEditOpen(false);
+  };
   
   const filteredOrders = filterStatus === 'all' 
     ? orders 
@@ -101,13 +153,55 @@ export default function Orders() {
               <td>
                 <div className="order-actions">
                   <button className="action-button">View</button>
-                  <button className="action-button">Edit</button>
+                  <button className="action-button" onClick={() => openEdit(order)}>Edit</button>
                 </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {isEditOpen && (
+        <div className="orders-modal-overlay" onClick={closeEdit}>
+          <div className="orders-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Edit Order</h3>
+            </div>
+            <div className="modal-body">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Order ID</label>
+                  <input value={editForm.id} disabled />
+                </div>
+                <div className="form-group">
+                  <label>Customer</label>
+                  <input name="customer" value={editForm.customer} onChange={onEditChange} />
+                </div>
+                <div className="form-group">
+                  <label>Date</label>
+                  <input type="date" name="date" value={editForm.date} onChange={onEditChange} />
+                </div>
+                <div className="form-group">
+                  <label>Status</label>
+                  <select name="status" value={editForm.status} onChange={onEditChange}>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Total ($)</label>
+                  <input type="number" step="0.01" min="0" name="total" value={editForm.total} onChange={onEditChange} />
+                </div>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="action-button" onClick={closeEdit}>Cancel</button>
+              <button className="action-button primary" onClick={saveEdit}>Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
