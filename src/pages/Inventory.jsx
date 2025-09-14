@@ -285,7 +285,7 @@ function Inventory() {
                 name="category"
                 value={formData.category}
                 onChange={handleInputChange}
-                placeholder="Food, Hygiene, etc."
+                placeholder="Disposable, Mod, Etc."
                 required
               />
             </div>
